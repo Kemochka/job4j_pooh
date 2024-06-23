@@ -3,7 +3,6 @@ package ru.job4j.pooh;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -34,23 +33,18 @@ public class PoohServer {
                             var action = details[0];
                             var name = details[1];
                             var text = details[2];
-                            if (action.equals("intro")) {
-                                if (name.equals("queue")) {
-                                    queueSchema.addReceiver(
-                                            new SocketReceiver(text, new PrintWriter(out))
-                                    );
+                            switch (action) {
+                                case "intro" -> {
+                                    if (name.equals("queue")) {
+                                        queueSchema.addReceiver(new SocketReceiver(text, new PrintWriter(out)));
+                                    }
+                                    if (name.equals("topic")) {
+                                        topicSchema.addReceiver(new SocketReceiver(text, new PrintWriter(out)));
+                                    }
                                 }
-                                if (name.equals("topic")) {
-                                    topicSchema.addReceiver(
-                                            new SocketReceiver(text, new PrintWriter(out))
-                                    );
-                                }
-                            }
-                            if (action.equals("queue")) {
-                                queueSchema.publish(new Message(name, text));
-                            }
-                            if (action.equals("topic")) {
-                                topicSchema.publish(new Message(name, text));
+                                case "queue" -> queueSchema.publish(new Message(name, text));
+                                case "topic" -> topicSchema.publish(new Message(name, text));
+                                default -> throw new IllegalStateException("Unexpected value: " + action);
                             }
                         }
                     } catch (Exception e) {
